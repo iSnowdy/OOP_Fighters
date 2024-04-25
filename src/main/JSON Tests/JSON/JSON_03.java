@@ -40,6 +40,12 @@ public class JSON_03 {
         String fighter01name = fighter01.get("Name").getAsString();
         System.out.println(fighter01name);
 
+        System.out.println("-------------");
+
+        for (String key : fighter01.keySet()) {
+            System.out.println(key + ": " + fighter01.get(key));
+        }
+
         // However we are not finished. We've only modified the data in jsonObject memory. The original file, outside
         // the project, has not yet been modified
 
