@@ -39,6 +39,14 @@
             "Vitality": 1,
             "Strength": 1,
             "Dexterity": 1
+        },
+        {
+            "Name": "Fighter6",
+            "Rank": "Five",
+            "Type": "Glass-Cannon",
+            "Vitality": 1,
+            "Strength": 20,
+            "Dexterity": 1
         }
     ]
 }
