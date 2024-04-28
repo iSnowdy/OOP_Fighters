@@ -6,9 +6,41 @@ import com.google.gson.JsonObject;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class JSON_04 {
+    public static void getFighterByString(String string, String desiredString, JsonObject jsonObject) {
+        int counter = 0; // Maybe we don't need it
+        try {
+            System.out.println("=====================================");
+            System.out.println();
+            for (int i = 0; i < jsonObject.getAsJsonArray("Fighters").size(); i ++) {
+                JsonObject fighter = jsonObject.getAsJsonArray("Fighters").get(i).getAsJsonObject();
+                if (Objects.equals(fighter.get(string).getAsString(), desiredString)) { // Example: string = Rank, desiredString = One
+                    System.out.println("Fighter of " + string + " details are: \n");
+                    for (String key : fighter.keySet()) {
+                        System.out.println(key + ": " + fighter.get(key));
+                    }
+                    System.out.println();
+                }
+                System.out.println("Size: " + jsonObject.getAsJsonArray("Fighters").size());
+            }
+
+            int[] fighterStats = new int[3];
+            int size = jsonObject.getAsJsonArray("Fighters").size() - 1;
+            JsonObject fighter = jsonObject.getAsJsonArray("Fighters").get(size).getAsJsonObject();
+            fighterStats[0] = fighter.get("Vitality").getAsInt();
+            fighterStats[1] = fighter.get("Strength").getAsInt();
+            fighterStats[2] = fighter.get("Dexterity").getAsInt();
+            System.out.println(Arrays.toString(fighterStats));
+
+            System.out.println("=====================================");
+        } catch (Exception exception04) {
+            System.err.println("Error while parsing\n" + exception04.getMessage());
+            exception04.printStackTrace();
+        }
+    }
     public static void main (String[] args) {
         // Like this we will be able to read an already created .json file
         JsonObject jsonObject = null; // So we can use it inside and outside the try-catch block
@@ -22,21 +54,16 @@ public class JSON_04 {
             jsonObject = gson.fromJson(fileReader, JsonObject.class);
 
             System.out.println("Reading JSON...\n\n");
-            String rank = "Five";
-            for (int i = 0; i < jsonObject.getAsJsonArray("Fighters").size(); i ++) {
-                JsonObject fighter00 =jsonObject.getAsJsonArray("Fighters").get(i).getAsJsonObject();
-                if (Objects.equals(fighter00.get("Rank").getAsString(), rank)) {
-                    System.out.println("Fighter of Rank " + rank + " details are: \n");
-                    for (String key : fighter00.keySet()) {
-                        System.out.println(key + ": " + fighter00.get(key));
-                    }
-                    System.out.println();
-                }
-            }
+            String string = "Name";
+            String desiredString = "Fighter6";
+
+            getFighterByString(string, desiredString, jsonObject);
+
             fileReader.close();
         } catch (IOException exception00) {
             exception00.printStackTrace();
         }
+
 
         // Like this we will be able to modify existen data in a .json file. Notice the index and String names
         // are really important
