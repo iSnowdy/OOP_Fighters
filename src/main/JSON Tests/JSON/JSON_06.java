@@ -6,8 +6,7 @@ import com.google.gson.JsonObject;
 public class JSON_06 {
     public static void main(String[] args) {
         String filePath = "fighterstest.json";
-        GSONCreator gsonCreator = new GSONCreator();
-        JsonObject jsonObject = gsonCreator.loadFile(filePath);
+        JsonObject jsonObject = GSONCreator.loadFile(filePath);
         JsonObject newFighter = new JsonObject();
         newFighter.addProperty("Name", "Fighter7");
         newFighter.addProperty("Rank", "One");
@@ -18,16 +17,16 @@ public class JSON_06 {
 
         JsonArray fighterArray = jsonObject.getAsJsonArray("Fighters");
 
-        if (!gsonCreator.fighterEquals(newFighter, fighterArray)) {
+        if (!GSONCreator.fighterExists(newFighter, fighterArray)) {
             fighterArray.add(newFighter);
             System.out.println("Fighter added successfully!");
         } else {
-            gsonCreator.removeFighter("Fighter7", jsonObject);
+            GSONCreator.removeFighter("Fighter7", jsonObject);
             System.out.println("Fighter removed successfully!");
         }
 
-        gsonCreator.saveFile(jsonObject, filePath);
-        gsonCreator.readFile(filePath);
+        GSONCreator.saveFile(jsonObject, filePath);
+        GSONCreator.readFile(filePath);
     }
 
 

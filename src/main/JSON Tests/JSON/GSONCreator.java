@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class GSONCreator {
-    /*
+     /*
     The purpose of this class is to:
         - Instantiate GSON class
         - Load .json files
@@ -17,17 +17,22 @@ public class GSONCreator {
         - Modify
         - Print specific String/int of the .json file?
         - Save changes made to the file itself (so we don't keep the changes in the Object memory)
+
+
+    Consider re factoring all of these methods to static. It should be a good practice since:
+
+        - It is used in a lot of classes across the project
+        - We would not need to create a new object of GSON every time we use it (which is the main purpose of this class)
+        - We would be able to access this class in static methods
      */
 
-    private Gson gson;
+    private static Gson gson = new GsonBuilder().setPrettyPrinting().create(); // Line breaks, blanks, spaces, etc
+    protected static String filepathJSON1 = "fighterstest.json";
+    protected static String filepathJSON2 = "tournamentlog.json";
 
-    public GSONCreator() {
-        this.gson = new GsonBuilder().setPrettyPrinting().create(); // Line breaks, blanks, spaces, etc
-    }
+    public GSONCreator() {}
 
-
-
-    public JsonObject loadFile(String filePath) { // return the JSON
+    public static JsonObject loadFile(String filePath) { // return the JSON
         try {
             FileReader fileReader = new FileReader(filePath);
             return gson.fromJson(fileReader, JsonObject.class);
@@ -38,7 +43,7 @@ public class GSONCreator {
         }
     }
 
-    public void saveFile(JsonObject jsonObject, String filePath) { // Given the JSON we want to save and the Filepath ...
+    public static void saveFile(JsonObject jsonObject, String filePath) { // Given the JSON we want to save and the Filepath ...
         try {
             FileWriter fileWriter = new FileWriter(filePath);
             gson.toJson(jsonObject, fileWriter);
@@ -49,12 +54,12 @@ public class GSONCreator {
         }
     }
     // Polymorphism
-    public void readFile(String filePath) {
+    public static void readFile(String filePath) { // Reads the whole JSON
         try {
             FileReader fileReader = new FileReader(filePath);
             JsonObject jsonObject = gson.fromJson(fileReader, JsonObject.class);
             System.out.println("Reading JSON... \n\n");
-            System.out.println(gson.toJson(jsonObject));
+            System.out.println(gson.toJson(jsonObject)); // Must print the object, not the fileReader too KEK
             fileReader.close();
         } catch (IOException exception02) {
             System.err.println("Error while reading the entirety JSON file\n" + exception02.getMessage());
@@ -89,14 +94,14 @@ public class GSONCreator {
     // to implement those methods using attributes in another class, not loading them from the JSON file. I think. Probably xd
 
 
-    public static void getFighterByString(String string, String desiredString, JsonObject jsonObject) {
+    public static void getFighterByString(String desiredFeature, String feature, JsonObject jsonObject) {
         int counter = 0; // Maybe we don't need it
         try {
             System.out.println("=====================================\n");
             for (int i = 0; i < jsonObject.getAsJsonArray("Fighters").size(); i ++) {
                 JsonObject fighter = jsonObject.getAsJsonArray("Fighters").get(i).getAsJsonObject();
-                if (Objects.equals(fighter.get(string).getAsString(), desiredString)) { // Example: string = Rank, desiredString = One
-                    System.out.println("Fighter of " + string + " details are: \n");
+                if (Objects.equals(fighter.get(desiredFeature).getAsString(), feature)) { // Example: string = Rank, desiredString = One
+                    System.out.println("Fighter of " + desiredFeature + " details are: \n");
                     for (String key : fighter.keySet()) {
                         System.out.println(key + ": " + fighter.get(key));
                     }
@@ -110,7 +115,7 @@ public class GSONCreator {
         }
     }
 
-    public int[] getFighterStats(String name, JsonObject jsonObject) { // Retrieves the stats of a specific Fighter
+    public static int[] getFighterStats(String name, JsonObject jsonObject) { // Retrieves the stats of a specific Fighter
         int[] fighterStats = new int[3];
         int size = jsonObject.getAsJsonArray("Fighters").size();
 
@@ -132,7 +137,7 @@ public class GSONCreator {
     }
 
     // Method to see if the Fighter has already been added to the JSON file
-    public boolean fighterEquals(JsonObject newFighter, JsonArray allFighters) {
+    public static boolean fighterExists(JsonObject newFighter, JsonArray allFighters) {
         for (int i = 0; i < allFighters.size(); i++) {
             JsonObject fighter = allFighters.get(i).getAsJsonObject();
             if (fighter.get("Name").getAsString().equals(newFighter.get("Name").getAsString())) {
@@ -143,7 +148,7 @@ public class GSONCreator {
         return false;
     }
 
-    public void removeFighter(String fighterName, JsonObject jsonObject) {// Retrieves the stats of a specific Fighter
+    public static void removeFighter(String fighterName, JsonObject jsonObject) {// Retrieves the stats of a specific Fighter
         JsonArray fightersArray = jsonObject.getAsJsonArray("Fighters");
 
         for (int i = 0; i < fightersArray.size(); i++) {
@@ -158,4 +163,74 @@ public class GSONCreator {
         }
     }
 
+    /*public static void addNewFighter(String name, String rank, int vitality, int strength, int dexterity) {
+        String filePath = "fighterstest.json";
+        JsonObject jsonObject = GSONCreator.loadFile(GSONCreator.filepathJSON1);
+        JsonObject newFighter = new JsonObject();
+
+        newFighter.addProperty("Name", name);
+        newFighter.addProperty("Rank", rank);
+        newFighter.addProperty("Type", ""); // Think about this. How to input the proper Type
+        newFighter.addProperty("Vitality", vitality);
+        newFighter.addProperty("Strength", strength);
+        newFighter.addProperty("Dexterity", dexterity);
+
+        JsonArray fighterArray = jsonObject.getAsJsonArray("Fighters");
+
+        // Verification if the Fighter exists already
+        if (!GSONCreator.fighterExists(newFighter, fighterArray)) { // if false -> add
+            FighterCreation fighterCreation = new FighterCreation();
+            String type = fighterCreation.setFighterType(name);
+            newFighter.addProperty("Type", type);
+            fighterArray.add(newFighter);
+            System.out.println("Fighter has been successfully added to the JSON File");
+        } else { // if true -> exists; remove
+            GSONCreator.removeFighter(name, jsonObject);
+            System.out.println("Fighter exists already. Elimination completed");
+        }
+        // Is the removal really needed?
+
+        GSONCreator.saveFile(jsonObject, filePath); // Crucial to save the changes made to the file
+        GSONCreator.readFile(filePath); // Print it. Maybe not needed
+    }*/
+
+    // This will loop through any JSON in the Project and return the index of the Object of the Array we are
+    // looping through. The search parameter can be any
+    public static int getIndex(String desiredFeature, String feature, int desiredJSON) {
+        switch (desiredJSON) {
+            case 1 -> {
+                JsonObject jsonObject = GSONCreator.loadFile(GSONCreator.filepathJSON1);
+                try {
+                    for (int i = 0; i < jsonObject.getAsJsonArray("Fighters").size(); i ++) {
+                        JsonObject fighter = jsonObject.getAsJsonArray("Fighters").get(i).getAsJsonObject();
+                        if (Objects.equals(fighter.get(desiredFeature).getAsString(), feature)) {
+                            return i;
+                        }
+                    }
+                } catch (Exception exception05) {
+                    System.err.println("Error while parsing\n" + exception05.getMessage());
+                    exception05.printStackTrace();
+                }
+            }
+            case 2 -> {
+                JsonObject jsonObject = GSONCreator.loadFile(GSONCreator.filepathJSON2);
+                try {
+                    for (int i = 0; i < jsonObject.getAsJsonArray("UserInfo").size(); i ++) {
+                        JsonObject user = jsonObject.getAsJsonArray("UserInfo").get(i).getAsJsonObject();
+                        if(Objects.equals(user.get(desiredFeature).getAsString(), feature)) {
+                            return i;
+                        }
+                    }
+                } catch (Exception exception06) {
+                    System.err.println("Error while parsing\n" + exception06.getMessage());
+                    exception06.printStackTrace();
+                }
+            }
+            default -> {
+                System.out.println("Wrong JSON File. Please try another one");
+                return -1;
+            }
+        }
+        return -1;
+    }
 }

@@ -38,7 +38,7 @@ public class JSON_03 {
 
         // Printing specific parts of the JSON Objects inside the Fighters Array
         String fighter01name = fighter01.get("Name").getAsString();
-        System.out.println(fighter01name);
+        System.out.println("Specific thing: " + fighter01name);
 
         System.out.println("-------------");
 
